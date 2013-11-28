@@ -1,23 +1,23 @@
 {
-  "name": "express-amqp",
+  "name": "connect-amqp",
   "description": "Express AMQP Session handler middleware.",
   "version": "0.1.0",
-  "homepage": "http://github.com/UsabilityDynamics/node-express-amqp",
+  "homepage": "http://github.com/UsabilityDynamics/node-connect-amqp",
   "author": {
     "name": "Usability Dynamics",
     "email": "info@UsabilityDynamics.com",
     "url": "http://UsabilityDynamics.com"
   },
   "bugs": {
-    "url": "http://github.com/UsabilityDynamics/node-express-amqp/issues"
+    "url": "http://github.com/UsabilityDynamics/node-connect-amqp/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "http://github.com/UsabilityDynamics/node-express-amqp/blob/master/LICENSE-MIT"
+      "url": "http://github.com/UsabilityDynamics/node-connect-amqp/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "lib/express-amqp.js",
+  "main": "lib/connect-amqp.js",
   "engines": {
     "node": ">=0.10.21"
   },
