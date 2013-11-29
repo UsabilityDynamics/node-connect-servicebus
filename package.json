@@ -1,23 +1,23 @@
 {
-  "name": "connect-amqp",
+  "name": "connect-servicebus",
   "description": "Express AMQP Session handler middleware.",
   "version": "0.1.0",
-  "homepage": "http://github.com/UsabilityDynamics/node-connect-amqp",
+  "homepage": "http://github.com/UsabilityDynamics/node-connect-servicebus",
   "author": {
     "name": "Usability Dynamics",
     "email": "info@UsabilityDynamics.com",
     "url": "http://UsabilityDynamics.com"
   },
   "bugs": {
-    "url": "http://github.com/UsabilityDynamics/node-connect-amqp/issues"
+    "url": "http://github.com/UsabilityDynamics/node-connect-servicebus/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "http://github.com/UsabilityDynamics/node-connect-amqp/blob/master/LICENSE-MIT"
+      "url": "http://github.com/UsabilityDynamics/node-connect-servicebus/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "lib/connect-amqp.js",
+  "main": "lib/connect-servicebus.js",
   "engines": {
     "node": ">=0.10.21"
   },
