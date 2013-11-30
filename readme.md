@@ -1,12 +1,9 @@
-Express AMQP Session handler middleware.
 
-## Getting Started
-Install the module with: `npm install express-amqp`
+ - Can be used to handle RPC processing of Grunt tasks.
 
 ```javascript
-var express_amqp = require('express-amqp');
-express_amqp.awesome(); // "awesome"
 ```
+
 ## Usage
 
 ## License

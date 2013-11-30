@@ -23,12 +23,13 @@
   },
   "dependencies": {
     "auto": "git+ssh://git@github.com:UsabilityDynamics/node-auto#master",
-    "commander": "~2.0.0",
     "lodash": "~2.2.1",
-    "advanced-require": "git+ssh://git@github.com:UsabilityDynamics/node-advanced-require#master",
     "object-settings": "git+ssh://git@github.com:UsabilityDynamics/node-object-settings#master",
     "object-emitter": "git+ssh://git@github.com:UsabilityDynamics/node-object-emitter#master",
-    "object-validation": "git+ssh://git@github.com:UsabilityDynamics/node-object-validation#master"
+    "object-validation": "git+ssh://git@github.com:UsabilityDynamics/node-object-validation#master",
+    "sqs": "~0.1.7",
+    "aws-snsclient": "~0.2.0",
+    "cpanel-lib": "0.0.3"
   },
   "devDependencies": {
     "grunt-contrib-symlink": "~0.2.0",
