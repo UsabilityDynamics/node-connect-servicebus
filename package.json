@@ -30,7 +30,10 @@
     "sqs": "~0.1.7",
     "aws-snsclient": "~0.2.0",
     "cpanel-lib": "0.0.3",
-    "debug": "~0.7.4"
+    "debug": "~0.7.4",
+    "generate-key": "0.0.6",
+    "deep-extend": "~0.2.6",
+    "pause": "0.0.1"
   },
   "devDependencies": {
     "grunt-contrib-symlink": "~0.2.0",
