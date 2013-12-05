@@ -6,6 +6,14 @@
 
 ## Usage
 
+- Application message identifier
+delivery-mode: Non-persistent (1) or persistent (2).
+priority: Message priority, 0 to 9.
+correlation-id: Application correlation identifier
+reply-to: Who to reply to.
+app-id: Creating application id
+type: Message type name
+
 ## License
 
 (The MIT License)
