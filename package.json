@@ -1,7 +1,7 @@
 {
   "name": "connect-servicebus",
   "description": "Express AMQP Session handler middleware.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "http://github.com/UsabilityDynamics/node-connect-servicebus",
   "repository": {
     "url": "git@github.com:UsabilityDynamics/node-connect-servicebus.git",
@@ -33,11 +33,13 @@
     "object-validation": "git+ssh://git@github.com:UsabilityDynamics/node-object-validation#master",
     "sqs": "~0.1.7",
     "aws-snsclient": "~0.2.0",
-    "cpanel-lib": "0.0.3",
     "debug": "~0.7.4",
     "generate-key": "0.0.6",
     "deep-extend": "~0.2.6",
-    "pause": "0.0.1"
+    "pause": "0.0.1",
+    "ws": "~0.4.31",
+    "socket-bus": "git://github.com/UsabilityDynamics/node-socket-bus",
+    "amqp": "~0.1.8"
   },
   "devDependencies": {
     "grunt-contrib-symlink": "~0.2.0",

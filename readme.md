@@ -1,18 +1,14 @@
 
- - Can be used to handle RPC processing of Grunt tasks.
+## Concept Notes
 
-```javascript
-```
-
-## Usage
-
-- Application message identifier
-delivery-mode: Non-persistent (1) or persistent (2).
-priority: Message priority, 0 to 9.
-correlation-id: Application correlation identifier
-reply-to: Who to reply to.
-app-id: Creating application id
-type: Message type name
+- Instance "Correlation" Queue binds to Service Exchange on either "correlationId" or "instanceId".
+- Service "RPC" Queue binds to Service Exchange on "product", "platform" and "version" fields.
+- RPC Requests declare the target method in "type" meta field.
+- RPC Responses have no "type" or "replyTo" meta.
+- RPC Responses Messages retain request's "correlationId" and "messageId".
+- The SB this._events.res object can be used to see currently enqueued RPC calls.
+- Incoming RPC Requests are emitted using "req.{type}" tag.
+- Incoming Correlation (Response) messages are emitted to "res.{}"
 
 ## License
 
