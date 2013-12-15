@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "lodash": "~2.2.1",
-    "object-settings": "git+ssh://git@github.com:UsabilityDynamics/node-object-settings#master",
-    "object-emitter": "git+ssh://git@github.com:UsabilityDynamics/node-object-emitter#master",
+    "object-settings": "UsabilityDynamics/node-object-settings",
+    "object-emitter": "UsabilityDynamics/node-object-emitter",
     "debug": "~0.7.4",
     "generate-key": "0.0.6",
     "deep-extend": "~0.2.6",
