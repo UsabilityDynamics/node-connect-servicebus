@@ -1,7 +1,7 @@
 {
   "name": "connect-servicebus",
   "description": "Express AMQP Session handler middleware.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "homepage": "http://github.com/UsabilityDynamics/node-connect-servicebus",
   "repository": {
     "url": "git@github.com:UsabilityDynamics/node-connect-servicebus.git",
