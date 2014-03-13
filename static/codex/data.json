@@ -1,0 +1,417 @@
+{
+    "project": {
+        "name": "connect-servicebus",
+        "description": "Express AMQP Session handler middleware.",
+        "version": "0.1.4",
+        "url": "http://github.com/UsabilityDynamics/node-connect-servicebus",
+        "logo": "http://media.usabilitydynamics.com/logo.png"
+    },
+    "files": {
+        "lib/common/utility.js": {
+            "name": "lib/common/utility.js",
+            "modules": {},
+            "classes": {
+                "Utility": 1
+            },
+            "fors": {
+                "Utility": 1
+            },
+            "namespaces": {}
+        },
+        "lib/connect-servicebus.js": {
+            "name": "lib/connect-servicebus.js",
+            "modules": {},
+            "classes": {
+                "serviceBus": 1
+            },
+            "fors": {
+                "serviceBus": 1
+            },
+            "namespaces": {}
+        }
+    },
+    "modules": {},
+    "classes": {
+        "Utility": {
+            "name": "Utility",
+            "shortname": "Utility",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "lib/common/utility.js",
+            "line": 1,
+            "description": "Utility Methods",
+            "is_constructor": 1
+        },
+        "serviceBus": {
+            "name": "serviceBus",
+            "shortname": "serviceBus",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "lib/connect-servicebus.js",
+            "line": 1,
+            "description": "Express Middleware for AMQP / WebSocket task distribution.",
+            "is_constructor": 1,
+            "version": "0.1.0"
+        }
+    },
+    "classitems": [
+        {
+            "file": "lib/common/utility.js",
+            "line": 21,
+            "description": "Deep Extend Object.",
+            "itemtype": "method",
+            "name": "extend",
+            "class": "Utility"
+        },
+        {
+            "file": "lib/common/utility.js",
+            "line": 33,
+            "description": "Placeholder Method",
+            "itemtype": "method",
+            "name": "noop",
+            "class": "Utility"
+        },
+        {
+            "file": "lib/common/utility.js",
+            "line": 45,
+            "description": "Placeholder Method",
+            "itemtype": "method",
+            "name": "noop",
+            "class": "Utility"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 29,
+            "description": "Options Instance.\n\nMixing OS into parent's settings and set options with defaults.\nExtend original settings, new options, and defaults into the injected instance of Object Settings.\nReturn settings object.\n\nObject Settings overwrites the \"get\" and \"set\" functions and hooks into events triggering\nevents such as \"set.something\" whenever this.set( 'something', 'blah' ) is used.",
+            "itemtype": "property",
+            "name": "settings",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 51,
+            "description": "Service Bus Active Test",
+            "return": {
+                "description": "",
+                "type": "ReadyEmitted|*"
+            },
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 63,
+            "description": "Service Bus Request",
+            "params": [
+                {
+                    "name": "type",
+                    "description": "The target method to call."
+                },
+                {
+                    "name": "callback",
+                    "description": "Callback method to trigger upon RPC Response."
+                }
+            ],
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 129,
+            "description": "Use Parent's Settings.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 139,
+            "description": "Use Parent's Method.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 149,
+            "description": "Use Parent's Method.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 159,
+            "itemtype": "property",
+            "name": "correlationId Shared ID for all request-response RPC calls for this instance.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 169,
+            "itemtype": "property",
+            "name": "instanceId Instance ID.\n\nDoes nothing, really.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 188,
+            "itemtype": "property",
+            "name": "connection AMQP connection.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 200,
+            "itemtype": "property",
+            "name": "connection AMQP connection.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 211,
+            "description": "Bind Prototypal Method.",
+            "itemtype": "property",
+            "name": "connection AMQP connection.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 222,
+            "description": "Bind Prototypal Method.",
+            "itemtype": "property",
+            "name": "connection AMQP connection.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 233,
+            "description": "Bind Prototypal Method.",
+            "itemtype": "property",
+            "name": "connection AMQP connection.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 244,
+            "description": "Bind Prototypal Method.",
+            "itemtype": "property",
+            "name": "connection AMQP connection.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 255,
+            "itemtype": "property",
+            "name": "connection AMQP connection.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 265,
+            "itemtype": "property",
+            "name": "exchange Service Request Exchange.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 298,
+            "description": "serviceBus Instance Properties.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 304,
+            "description": "WebSocket RPC Server",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 332,
+            "description": "Establish Connection",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 420,
+            "description": "Configure Exchange once Connected.",
+            "params": [
+                {
+                    "name": "error",
+                    "description": "Always null, only for consistency."
+                },
+                {
+                    "name": "exchange",
+                    "description": "Exchange object."
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "*"
+            },
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 478,
+            "description": "Work Request Queue Configuration",
+            "params": [
+                {
+                    "name": "queue",
+                    "description": ""
+                }
+            ],
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 504,
+            "description": "Response Callback passed into RPC Handler Method.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 623,
+            "description": "Emute Express param() Method\n\nGet a parameter.",
+            "params": [
+                {
+                    "name": "key",
+                    "description": ""
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "*"
+            },
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 639,
+            "description": "Emute Express Send Method",
+            "params": [
+                {
+                    "name": "data",
+                    "description": ""
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "*"
+            },
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 673,
+            "description": "Instance Correlation Queue.\n\nMessages only routed into this queue when in direct response to a message originating form this instance.\nReceive Messages sent to this specific insance, mostly RPC Responses.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 694,
+            "description": "Correlation Message Callback.",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 815,
+            "description": "serviceBus Constructor Properties",
+            "class": "serviceBus"
+        },
+        {
+            "file": "lib/connect-servicebus.js",
+            "line": 821,
+            "description": "Create Instance",
+            "class": "serviceBus"
+        }
+    ],
+    "warnings": [
+        {
+            "message": "unknown tag: version",
+            "line": " lib/connect-servicebus.js:1"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " lib/connect-servicebus.js:51"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " lib/connect-servicebus.js:420"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " lib/connect-servicebus.js:623"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " lib/connect-servicebus.js:639"
+        },
+        {
+            "message": "Missing item type\nService Bus Active Test",
+            "line": " lib/connect-servicebus.js:51"
+        },
+        {
+            "message": "Missing item type\nService Bus Request",
+            "line": " lib/connect-servicebus.js:63"
+        },
+        {
+            "message": "Missing item type\nUse Parent's Settings.",
+            "line": " lib/connect-servicebus.js:129"
+        },
+        {
+            "message": "Missing item type\nUse Parent's Method.",
+            "line": " lib/connect-servicebus.js:139"
+        },
+        {
+            "message": "Missing item type\nUse Parent's Method.",
+            "line": " lib/connect-servicebus.js:149"
+        },
+        {
+            "message": "Missing item type\nserviceBus Instance Properties.",
+            "line": " lib/connect-servicebus.js:298"
+        },
+        {
+            "message": "Missing item type\nWebSocket RPC Server",
+            "line": " lib/connect-servicebus.js:304"
+        },
+        {
+            "message": "Missing item type\nEstablish Connection",
+            "line": " lib/connect-servicebus.js:332"
+        },
+        {
+            "message": "Missing item type\nConfigure Exchange once Connected.",
+            "line": " lib/connect-servicebus.js:420"
+        },
+        {
+            "message": "Missing item type\nWork Request Queue Configuration",
+            "line": " lib/connect-servicebus.js:478"
+        },
+        {
+            "message": "Missing item type\nResponse Callback passed into RPC Handler Method.",
+            "line": " lib/connect-servicebus.js:504"
+        },
+        {
+            "message": "Missing item type\nEmute Express param() Method\n\nGet a parameter.",
+            "line": " lib/connect-servicebus.js:623"
+        },
+        {
+            "message": "Missing item type\nEmute Express Send Method",
+            "line": " lib/connect-servicebus.js:639"
+        },
+        {
+            "message": "Missing item type\nInstance Correlation Queue.\n\nMessages only routed into this queue when in direct response to a message originating form this instance.\nReceive Messages sent to this specific insance, mostly RPC Responses.",
+            "line": " lib/connect-servicebus.js:673"
+        },
+        {
+            "message": "Missing item type\nCorrelation Message Callback.",
+            "line": " lib/connect-servicebus.js:694"
+        },
+        {
+            "message": "Missing item type\nserviceBus Constructor Properties",
+            "line": " lib/connect-servicebus.js:815"
+        },
+        {
+            "message": "Missing item type\nCreate Instance",
+            "line": " lib/connect-servicebus.js:821"
+        }
+    ]
+}

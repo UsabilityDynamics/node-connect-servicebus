@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>lib/connect-servicebus.js - connect-servicebus</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="http://media.usabilitydynamics.com/logo.png" title="connect-servicebus"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.1.4</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/serviceBus.html">serviceBus</a></li>
+            
+                <li><a href="../classes/Utility.html">Utility</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: lib/connect-servicebus.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * Express Middleware for AMQP / WebSocket task distribution.
+ *
+ * @class serviceBus
+ * @constructor
+ * @version 0.1.0
+ */
+function serviceBus( options ) {
+
+  // Force Proper Instance.
+  if( !( this instanceof serviceBus ) ) {
+    return serviceBus.create( options || {} );
+  }
+
+  var self      = this;
+  var app       = require( &#x27;express&#x27; ).call();
+  var settings  = require( &#x27;object-settings&#x27; );
+  var emitter   = require( &#x27;object-emitter&#x27; );
+  var client    = require( &#x27;varnish-client&#x27; );
+  var format    = require( &#x27;util&#x27; ).format;
+
+  // Return Middleware Application Instance.
+  return app.once( &#x27;mount&#x27;, function mounted( parent ) {
+    self.debug( &#x27;serviceBusMiddleware mounted to [route:%s]&#x27;, parent.route );
+
+    // Extend Parent Application.
+    Object.defineProperties( this.parent, {
+      settings: {
+        /**
+         * Options Instance.
+         *
+         * Mixing OS into parent&#x27;s settings and set options with defaults.
+         * Extend original settings, new options, and defaults into the injected instance of Object Settings.
+         * Return settings object.
+         *
+         * Object Settings overwrites the &quot;get&quot; and &quot;set&quot; functions and hooks into events triggering
+         * events such as &quot;set.something&quot; whenever this.set( &#x27;something&#x27;, &#x27;blah&#x27; ) is used.
+         *
+         * @property settings
+         */
+        value: settings.inject( parent ).set( parent.settings ).set({ serviceBus: serviceBus.defaults }).set({ serviceBus: options }).get(),
+        enumerable: true,
+        configurable: true,
+        writable: true
+      }
+    });
+
+    // Extend Request with ServiceBus Methods.
+    Object.defineProperties( this.parent.request, {
+      bus_active: {
+        /**
+         * Service Bus Active Test
+         *
+         * @returns {readyEmitted|*}
+         */
+        get: function get() {
+          return self.exchange &amp;&amp; self.exchange.state ? true : false;
+        },
+        enumerable: true,
+        configurable: true
+      },
+      offload: {
+        /**
+         * Service Bus Request
+         *
+         * @param type The target method to call.
+         * @param callback Callback method to trigger upon RPC Response.
+         */
+        value: function offload( type, callback ) {
+          // app.debug( &#x27;offload [type:%s]&#x27;, type );
+
+          var req = this;
+          var res = this.res;
+          var app = this.app;
+
+          if( !self.exchange ) {
+            return callback( new Error( &#x27;ServiceBus Exchange is not ready.&#x27; ), null )
+          }
+
+          try {
+
+            // Genreate Message ID for request and correlation response.
+            var messageId = self.utility.uid( 20 );
+
+            // Service RPC Work Request.
+            self.exchange.publish( &#x27;&#x27;, {
+              params: self.utility.deep_extend( req.body, req.query, req.params ),
+              headers: req.headers || {},
+              session: req.session || {},
+              locals: res.locals || {}
+            }, {
+              messageId: messageId,
+              type: type,
+              replyTo: self.correlationId,
+              correlationId: self.correlationId,
+              mandatory: true,
+              deliveryMode: 2,
+              priority: 4,
+              contentType: &#x27;application/json&#x27;,
+              headers: {
+                &#x27;product&#x27;: self.get( &#x27;product&#x27; ),
+                &#x27;platform&#x27;: self.get( &#x27;platform&#x27; ),
+                &#x27;version&#x27;: self.get( &#x27;version&#x27; ),
+                &#x27;x-host&#x27;: require( &#x27;os&#x27; ).hostname().toLowerCase(),
+                &#x27;x-pid&#x27;: process.pid
+              }
+            });
+
+            self.debug( &#x27;Offloaded RPC Request [%s] with [messageId:%s].&#x27;, type, messageId );
+
+            // Bind to EventEmitter Callback.
+            self.on([ &#x27;res&#x27;, messageId ].join( &#x27;.&#x27; ), callback );
+
+          } catch( error ) {
+            app.debug( &#x27;Offload Error. [message: %s].&#x27;, error.message, error.stack );
+            return callback( new Error( &#x27;ServiceBus Exchange failed.&#x27;), null )
+          }
+
+        },
+        enumerable: true,
+        writable: true,
+        configurable: true
+      }
+    });
+
+    // Extend Middleware Application.
+    Object.defineProperties( this, {
+      engines: {
+        /**
+         * Use Parent&#x27;s Settings.
+         *
+         */
+        value: parent.engines,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      },
+      on: {
+        /**
+         * Use Parent&#x27;s Method.
+         *
+         */
+        value: parent.on,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      },
+      emit: {
+        /**
+         * Use Parent&#x27;s Method.
+         *
+         */
+        value: parent.emit,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      },
+      correlationId: {
+        /**
+         * @property correlationId Shared ID for all request-response RPC calls for this instance.
+         *
+         */
+        value: serviceBus.prototype.utility.uid( 16 ).toLowerCase(),
+        enumerable: false,
+        configurable: true,
+        writable: true
+      },
+      instanceId: {
+        /**
+         * @property instanceId Instance ID.
+         *
+         * Does nothing, really.
+         *
+         */
+        value: serviceBus.prototype.utility.uid( 16 ).toLowerCase(),
+        enumerable: false,
+        configurable: true,
+        writable: true
+      },
+      settings: {
+        get: function() {
+          return this.parent.get( &#x27;serviceBus&#x27; );
+        },
+        enumerable: true,
+        configurable: true
+      },
+      set: {
+        /**
+         * @property connection AMQP connection.
+         *
+         */
+        value: function( key, value ) {
+          this.parent.set( &#x27;serviceBus.&#x27; + key, value );
+        },
+        enumerable: false,
+        configurable: true,
+        writable: true
+      },
+      get: {
+        /**
+         * @property connection AMQP connection.
+         *
+         */
+        value: function( key, defaults ) {
+          return this.parent.get( &#x27;serviceBus.&#x27; + key, defaults );
+        },
+        enumerable: false,
+        configurable: true
+      },
+      createConnection: {
+        /**
+         * Bind Prototypal Method.
+         *
+         * @property connection AMQP connection.
+         */
+        value: serviceBus.prototype.createConnection.bind( this ),
+        enumerable: false,
+        configurable: true,
+        writable: true
+      },
+      configureExchange: {
+        /**
+         * Bind Prototypal Method.
+         *
+         * @property connection AMQP connection.
+         */
+        value: serviceBus.prototype.configureExchange.bind( this ),
+        enumerable: false,
+        configurable: true,
+        writable: true
+      },
+      webSocket: {
+        /**
+         * Bind Prototypal Method.
+         *
+         * @property connection AMQP connection.
+         */
+        value: serviceBus.prototype.webSocket.bind( this ),
+        enumerable: false,
+        configurable: true,
+        writable: true
+      },
+      debug: {
+        /**
+         * Bind Prototypal Method.
+         *
+         * @property connection AMQP connection.
+         */
+        value: serviceBus.prototype.debug.bind( this ),
+        enumerable: false,
+        configurable: true,
+        writable: true
+      },
+      connection: {
+        /**
+         * @property connection AMQP connection.
+         *
+         */
+        value: null,
+        enumerable: false,
+        configurable: true,
+        writable: true
+      },
+      exchange: {
+        /**
+         * @property exchange Service Request Exchange.
+         *
+         */
+        value: null,
+        enumerable: false,
+        configurable: true,
+        writable: true
+      }
+    });
+
+    // URL Changed.
+    this.parent.on( &#x27;set.serviceBus.url&#x27;, function url_changed( error, value, path ) {
+      app.debug( &#x27;URL change detected, connecting to [%s].&#x27;, app.get( &#x27;url&#x27; ) );
+      app.createConnection();
+    });
+
+    // Format Name.
+    this.set( &#x27;name&#x27;, this.get( &#x27;name&#x27; || &#x27;&#x27; ).replace( /-/g, &#x27;.&#x27; ) );
+
+    // Configure Connection on next tick. This is to allow changes to options.
+    if( this.get( &#x27;url&#x27; )  ) {
+      app.debug( &#x27;Connecting to [%s].&#x27;, this.get( &#x27;url&#x27; ) );
+      app.createConnection();
+    }
+
+    // @chainable
+    return this;
+
+  });
+
+}
+
+/**
+ * serviceBus Instance Properties.
+ *
+ */
+Object.defineProperties( serviceBus.prototype, {
+  webSocket: {
+    /**
+     * WebSocket RPC Server
+     *
+     */
+    value: function webSocket() {
+
+       var ws  = require( &#x27;ws&#x27; );
+
+       // WebSocket Server.
+       this.ws = ws.createServer({
+       server: this.server,
+       clientTracking: true
+       //path: &#x27;/stream&#x27;
+       });
+
+       this.ws.on( &#x27;connection&#x27;, function( ws ) {});
+
+    },
+    enumerable: true,
+    configurable: true
+  },
+  debug: {
+    value: require( &#x27;debug&#x27; )( &#x27;connect:servicebus&#x27; ),
+    enumerable: true,
+    configurable: true,
+    writable: true
+  },
+  createConnection: {
+    /**
+     * Establish Connection
+     *
+     * @for serviceBus
+     */
+    value: function createConnection() {
+      // console.log( this.options );
+
+      var self      = this;
+      var amqp      = require( &#x27;amqp&#x27; );
+      var os        = require( &#x27;os&#x27; );
+      var cluster   = require( &#x27;cluster&#x27; );
+      var target;
+
+      try {
+        target = require( &#x27;url&#x27; ).parse( this.get( &#x27;url&#x27; ) );
+
+        if( !target.hostname ) {
+          throw new Error( &#x27;Host name could not be determined.&#x27; );
+        }
+
+      } catch( error ) {
+        console.log( &#x27;createConnection&#x27;, error, error.stack );
+        return;
+      }
+
+      this.connection = amqp.createConnection({
+        host: target.hostname,
+        port: target.port || 8000,
+        login: target.auth ? target.auth.split( &#x27;:&#x27; )[0] : &#x27;&#x27;,
+        password: target.auth ? target.auth.split( &#x27;:&#x27; )[1] : &#x27;&#x27;,
+        clientProperties: {
+          arch: process.arch,
+          hostname: this.get( &#x27;hostname&#x27; ),
+          priority: this.get( &#x27;priority&#x27; ),
+          product: this.get( &#x27;product&#x27; ),
+          platform: this.get( &#x27;platform&#x27; ),
+          version: this.get( &#x27;version&#x27; ),
+          applicationName: this.get( &#x27;application&#x27; ),
+          pid: process.pid,
+          worker: cluster.isWorker ? cluster.worker.id : null,
+          cpus: require( &#x27;os&#x27; ).cpus().length || 1,
+          total_memory: require( &#x27;os&#x27; ).totalmem() || 0,
+          user: process.env.USER || process.env.USERNAME
+        }
+      });
+
+      // AMQP Connection Failed.
+      this.connection.on( &#x27;error&#x27;, function have_error( error ) {
+        self.debug( &#x27;connection:error [%s], [message:%s]&#x27;, self.get( &#x27;name&#x27; ), error.message );
+        // console.log( &#x27;amqp.createConnection&#x27;, error, error.stack );
+      });
+
+      // AMQP Connection Established.
+      this.connection.once( &#x27;ready&#x27;, function is_ready() {
+        self.debug( &#x27;Connected to AMQP [name:%s].&#x27;, self.get( &#x27;name&#x27; ) );
+
+        // Service Exchange.
+        self.exchange = self.connection.exchange( [ self.get( &#x27;platform&#x27; ), self.get( &#x27;product&#x27; ) ].join( &#x27;.&#x27; ), {
+          type: &#x27;headers&#x27;,
+          passive: false,
+          confirm: true,
+          noDeclare: false,
+          durable: true,
+          autoDelete: true
+        });
+
+        // Create Queues once Exchange is Ready. Must bind to main context or will be called in amqp connection context.
+        self.exchange.once( &#x27;open&#x27;, serviceBus.prototype.configureExchange.bind( self, null, self.exchange ) );
+
+      });
+
+      // Early Exit.
+      process.once( &#x27;SIGINT&#x27;, function exit() {
+
+        if( self.connection.close ) {
+          self.debug( &#x27;Got SIGINT. Closing ServiceBus Connection.&#x27; );
+          self.connection.close();
+        }
+
+      });
+
+    },
+    enumerable: true,
+    configurable: true,
+    writable: true
+  },
+  configureExchange: {
+    /**
+     * Configure Exchange once Connected.
+     *
+     * @param error Always null, only for consistency.
+     * @param exchange Exchange object.
+     * @returns {*}
+     */
+    value: function configureExchange( error, exchange ) {
+      this.debug( &#x27;Connected to Exchange [name:%s].&#x27;, exchange.name );
+
+      // Service Type Work Queue.
+      this.connection.queue([ exchange.name, &#x27;rpc&#x27; ].join( &#x27;.&#x27; ), {
+        passive: false,
+        durable: true,
+        autoDelete: true,
+        closeChannelOnUnsubscribe: true,
+        noDeclare: false,
+        arguments: {
+          &#x27;product&#x27;: this.get( &#x27;product&#x27; ),
+          &#x27;platform&#x27;: this.get( &#x27;platform&#x27; ),
+          &#x27;version&#x27;: this.get( &#x27;version&#x27; ),
+          &#x27;x-max-length&#x27;: 1000,
+          &#x27;x-message-ttl&#x27;: 900000,
+          &#x27;x-expires&#x27;: 60000
+        }
+      }, serviceBus.prototype.workQueue.bind( this ) );
+
+      // Correlation Queue for Work Request Responses.
+      this.connection.queue([ exchange.name, &#x27;cid&#x27;, this.correlationId ].join( &#x27;.&#x27; ), {
+        passive: false,
+        durable: false,
+        exclusive: true,
+        autoDelete: true,
+        closeChannelOnUnsubscribe: true,
+        noDeclare: false,
+        arguments: {
+          &#x27;correlationId&#x27;: this.correlationId,
+          &#x27;name&#x27;: this.get( &#x27;name&#x27; ),
+          &#x27;platform&#x27;: this.get( &#x27;platform&#x27; ),
+          &#x27;product&#x27;: this.get( &#x27;product&#x27; ),
+          &#x27;version&#x27;: this.get( &#x27;version&#x27; ),
+          &#x27;x-host&#x27;: require( &#x27;os&#x27; ).hostname().toLowerCase(),
+          &#x27;x-pid&#x27;: process.pid,
+          &#x27;x-max-length&#x27;: 1000,
+          &#x27;x-message-ttl&#x27;: 900000,
+          &#x27;x-expires&#x27;: 900000
+        }
+      }, serviceBus.prototype.correlationQueue.bind( this ) );
+
+      // @chainable
+      return this;
+
+    },
+    enumerable: false,
+    configurable: true,
+    writable: false
+  },
+  workQueue: {
+    /**
+     * Work Request Queue Configuration
+     *
+     * @param queue
+     */
+    value: function workQueue( queue ) {
+      this.debug( &#x27;Created RPC Queue [name:%s] with [state:%s].&#x27;, queue.name, queue.state );
+
+      var self = this;
+
+      // Bind to Service RPC.
+      queue.bind_headers( [ self.get( &#x27;platform&#x27; ), self.get( &#x27;product&#x27; ) ].join( &#x27;.&#x27; ), {
+        &#x27;product&#x27;: self.get( &#x27;product&#x27; ),
+        &#x27;platform&#x27;: self.get( &#x27;platform&#x27; ),
+        &#x27;version&#x27;: self.get( &#x27;version&#x27; ),
+        &#x27;x-match&#x27;: &#x27;all&#x27;
+      });
+
+      // Consumer RPC Requests.
+      queue.subscribe({ ack: self.get( &#x27;acknowledge&#x27; ), prefetchCount: self.get( &#x27;prefetch&#x27; ) }, function( message, headers, deliveryInfo ) {
+        self.debug( &#x27;Received RPC Request [%s] with [messageId:%s, correlationId:%s].&#x27;, deliveryInfo.type, deliveryInfo.messageId, deliveryInfo.correlationId );
+
+        if( !deliveryInfo.type ) {
+          return queue.shift( false );
+        }
+
+        /**
+         * Response Callback passed into RPC Handler Method.
+         *
+         */
+        function requestCallback( error, message ) {
+          self.debug( &#x27;Publishing RPC Response [messageId:%s] typeof message [%s];&#x27;, requestCallback.messageId, typeof message );
+
+          // Publish Response Messaage.
+          self.exchange.publish([ self.exchange.name, &#x27;cid&#x27;, self.correlationId ].join( &#x27;.&#x27; ), message || error || {}, {
+            messageId: requestCallback.messageId,
+            correlationId: requestCallback.correlationId,
+            mandatory: true,
+            deliveryMode: 2,
+            priority: 3,
+            contentType: &#x27;application/json&#x27;,
+            headers: {
+              &#x27;correlationId&#x27;: requestCallback.correlationId || &#x27;&#x27;,
+              &#x27;product&#x27;: self.get( &#x27;product&#x27; ),
+              &#x27;version&#x27;: self.get( &#x27;version&#x27; ),
+              &#x27;x-host&#x27;: require( &#x27;os&#x27; ).hostname().toLowerCase(),
+              &#x27;x-pid&#x27;: process.pid
+            }
+          });
+
+        }
+
+        // Response Callback Properties. (Emulated both request and response streams, for now.)
+        Object.defineProperties( requestCallback, {
+          type: {
+            value: deliveryInfo.type,
+            enumerable: true,
+            configurable: true,
+            writable: true
+          },
+          correlationId: {
+            value: deliveryInfo.correlationId,
+            enumerable: true,
+            configurable: true,
+            writable: true
+          },
+          message: {
+            value: message || {},
+            enumerable: true,
+            configurable: true,
+            writable: true
+          },
+          headers: {
+            value: headers || {},
+            enumerable: true,
+            configurable: true,
+            writable: true
+          },
+          replyTo: {
+            value: deliveryInfo.replyTo,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          messageId: {
+            value: deliveryInfo.messageId,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          deliveryInfo: {
+            value: deliveryInfo,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          connection: {
+            value: self.connection,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          serviceBus: {
+            value: self,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          exchange: {
+            value: self.exchange,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          queue: {
+            value: queue,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          reject: {
+            value: function reject() {
+
+              if( self.get( &#x27;acknowledge&#x27; ) ) {
+                queue.shift( true );
+              }
+
+            },
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          acknowledge: {
+            value: function acknowledge() {
+
+              if( self.get( &#x27;acknowledge&#x27; ) ) {
+                queue.shift();
+              }
+
+            },
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          param: {
+            /**
+             * Emute Express param() Method
+             *
+             * Get a parameter.
+             *
+             * @param key
+             * @returns {*}
+             */
+            value: function param( key ) {
+              return key ? requestCallback.message[ key ] : requestCallback.message
+            },
+            enumerable: true,
+            configurable: true,
+            writable: true
+          },
+          send: {
+            /**
+             * Emute Express Send Method
+             *
+             * @param data
+             * @returns {*}
+             */
+            value: function send( code, data ) {
+              return requestCallback( code, data )
+            },
+            enumerable: true,
+            configurable: true,
+            writable: true
+          }
+        });
+
+        // Engine Handler Exists.
+        if( self.engines[ requestCallback.type ] ) {
+
+          // Automatically Acknowledge.
+          requestCallback.acknowledge();
+
+          // Process Handler.
+          self.engines[ requestCallback.type ]( requestCallback, requestCallback, requestCallback );
+
+        }
+
+      });
+
+    },
+    enumerable: false,
+    configurable: true,
+    writable: false
+  },
+  correlationQueue: {
+    /**
+     * Instance Correlation Queue.
+     *
+     * Messages only routed into this queue when in direct response to a message originating form this instance.
+     * Receive Messages sent to this specific insance, mostly RPC Responses.
+     *
+     */
+    value: function correlationQueue( queue ) {
+      this.debug( &#x27;Created Correlation Queue [name:%s] with [state:%s].&#x27;, queue.name, queue.state );
+
+      var self = this;
+
+      // Bind to service exchange
+      queue.bind_headers( [ self.get( &#x27;platform&#x27; ), self.get( &#x27;product&#x27; ) ].join( &#x27;.&#x27; ), {
+        correlationId: self.correlationId
+      });
+
+      // Receive Messages sent to this specific insance, mostly RPC Responses.
+      queue.subscribe({ ack: self.get( &#x27;acknowledge&#x27; ), prefetchCount: self.get( &#x27;prefetch&#x27; ) }, function( message, headers, deliveryInfo ) {
+        self.debug( &#x27;Received RPC Response [messageId:%s].&#x27;, deliveryInfo.messageId );
+
+        /**
+         * Correlation Message Callback.
+         *
+         */
+        function responseCallback() {}
+
+        // Response Callback Properties.
+        Object.defineProperties( responseCallback, {
+          type: {
+            value: deliveryInfo.type,
+            enumerable: true,
+            configurable: true,
+            writable: true
+          },
+          correlationId: {
+            value: deliveryInfo.correlationId,
+            enumerable: true,
+            configurable: true,
+            writable: true
+          },
+          message: {
+            value: message || {},
+            enumerable: true,
+            configurable: true,
+            writable: true
+          },
+          headers: {
+            value: headers || {},
+            enumerable: true,
+            configurable: true,
+            writable: true
+          },
+          replyTo: {
+            value: deliveryInfo.replyTo,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          messageId: {
+            value: deliveryInfo.messageId,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          deliveryInfo: {
+            value: deliveryInfo,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          connection: {
+            value: self.connection,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          serviceBus: {
+            value: self,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          exchange: {
+            value: self.exchange,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          queue: {
+            value: queue,
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          reject: {
+            value: function reject() {
+
+              if( self.get( &#x27;acknowledge&#x27; ) ) {
+                queue.shift( true );
+              }
+
+            },
+            enumerable: false,
+            configurable: true,
+            writable: true
+          },
+          acknowledge: {
+            value: function acknowledge() {
+
+              if( self.get( &#x27;acknowledge&#x27; ) ) {
+                queue.shift();
+              }
+
+            },
+            enumerable: false,
+            configurable: true,
+            writable: true
+          }
+        });
+
+        // Acknowledge Receipt.
+        responseCallback.acknowledge();
+
+        // Call Message Handler.
+        self.emit([ &#x27;res&#x27;, responseCallback.messageId ].join( &#x27;.&#x27; ), null, responseCallback.message, responseCallback.headers );
+
+      });
+
+    },
+    enumerable: false,
+    configurable: true,
+    writable: false
+  },
+  utility: {
+    value: require( &#x27;./common/utility&#x27; ),
+    enumerable: false,
+    configurable: true,
+    writable: false
+  }
+});
+
+/**
+ * serviceBus Constructor Properties
+ *
+ */
+Object.defineProperties( module.exports = serviceBus, {
+  create: {
+    /**
+     * Create Instance
+     *
+     * @for serviceBus
+     */
+    value: function create( options ) {
+      return new serviceBus( options || {} );
+    },
+    enumerable: true,
+    configurable: true,
+    writable: true
+  },
+  defaults: {
+    value: {
+      url: undefined,
+      acknowledge: true,
+      hostname: require( &#x27;os&#x27; ).hostname().toLowerCase() || &#x27;&#x27;,
+      priority: 3,
+      prefetch: 0,
+      type: &#x27;headers&#x27;,
+      platform: process.platform,
+      product: require( &#x27;../package&#x27; ).name,
+      version: require( &#x27;../package&#x27; ).version,
+      application: &#x27;node.js&#x27;
+    },
+    enumerable: true,
+    configurable: true,
+    writable: true
+  }
+});
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

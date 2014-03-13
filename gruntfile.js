@@ -28,7 +28,7 @@ module.exports = function( grunt ) {
         url: '<%= pkg.homepage %>',
         logo: 'http://media.usabilitydynamics.com/logo.png',
         options: {
-          paths: [ "./bin", "./lib" ],
+          paths: [ "./lib" ],
           outdir: './static/codex'
         }
       }
